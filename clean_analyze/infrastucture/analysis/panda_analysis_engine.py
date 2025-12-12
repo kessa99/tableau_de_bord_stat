@@ -2,6 +2,7 @@
 analyse des données avec pandas
 """
 
+from typing import List, Dict, Any
 import pandas as pd
 import numpy as np
 
@@ -24,14 +25,14 @@ class PandaAnalysisEngine:
         """
         df = pd.read_csv(csv_path)
         return {
-            "total_etudiants": int(df["ID_étudiant"].nunique()),
+            "total_etudiants": int(df["student_id"].nunique()),
             "total_notes": len(df),
-            "moyenne": round(df["Note"].mean(), 2),
-            "mediane": float(df["Note"].median()),
-            "ecart_type": round(df["Note"].std(), 2),
-            "taux_reussite_%": round((df["Note"] >= 10).mean() * 100, 2),
-            "histogramme": np.histogram(df["Note"], bins=20, range=(0,20))[0].tolist(),
-            "bins": np.histogram(df["Note"], bins=20, range=(0,20))[1].tolist(),
+            "moyenne": round(df["note"].mean(), 2),
+            "mediane": float(df["note"].median()),
+            "ecart_type": round(df["note"].std(), 2),
+            "taux_reussite_%": round((df["note"] >= 10).mean() * 100, 2),
+            "histogramme": np.histogram(df["note"], bins=20, range=(0,20))[0].tolist(),
+            "bins": np.histogram(df["note"], bins=20, range=(0,20))[1].tolist(),
         }
     
     @staticmethod
@@ -41,7 +42,7 @@ class PandaAnalysisEngine:
         """
         df = pd.read_csv(csv_path)
         return(
-            df.groupby(["Departement", "UE", "Matiere"])["Note"]
+            df.groupby(["departement", "Code_ue", "Matiere"])["note"]
             .agg(
                 moyenne="mean",
                 mediane="median",
@@ -61,23 +62,23 @@ class PandaAnalysisEngine:
         """
         calculer les statistiques par matiere
         """
-        df = dp.read_csv(csv_path)
+        df = pd.read_csv(csv_path)
         sub = df[df["Matiere"] == subject]
         if sub.empty:
             raise ValueError(f"Aucune note trouvée pour la matiere {subject}")
         return {
             "matiere": subject,
-            "moyenne": round(sub["Note"].mean(), 2),
+            "moyenne": round(sub["note"].mean(), 2),
             "total_etudiants": int(sub["ID_étudiant"].nunique()),
             "total_notes": len(sub),
-            "taux_reussite_%": round((sub["Note"] >= 10).mean() * 100, 2),
-            "boxplot_data": sub["Note"].tolist(),
-            "departement": sub["Departement"].unique().tolist(),
-            "ue": sub["UE"].unique().tolist(),
-            "mediane": float(sub["Note"].median()),
-            "ecart_type": round(sub["Note"].std(), 2),
-            "histogramme": np.histogram(sub["Note"], bins=20, range=(0,20))[0].tolist(),
-            "bins": np.histogram(sub["Note"], bins=20, range=(0,20))[1].tolist(),
+            "taux_reussite_%": round((sub["note"] >= 10).mean() * 100, 2),
+            "boxplot_data": sub["note"].tolist(),
+            "departement": sub["departement"].unique().tolist(),
+            "code_ue": sub["Code_ue"].unique().tolist(),
+            "mediane": float(sub["note"].median()),
+            "ecart_type": round(sub["note"].std(), 2),
+            "histogramme": np.histogram(sub["note"], bins=20, range=(0,20))[0].tolist(),
+            "bins": np.histogram(sub["note"], bins=20, range=(0,20))[1].tolist(),
         }
     
     @staticmethod
@@ -89,7 +90,7 @@ class PandaAnalysisEngine:
         sub = df[df["Enseignant"].str.contains(teacher, case=False, na=False)]
         if sub.empty:
             raise ValueError("Enseignant non trouvé")
-        return (sub.groupby("Matière")["Note"]
+        return (sub.groupby("Matière")["note"]
                    .agg(moyenne="mean", nb_etudiants="count")
                    .round(2)
                    .sort_values("moyenne", ascending=False)
@@ -106,15 +107,15 @@ class PandaAnalysisEngine:
         if sub.empty:
             raise ValueError("Étudiant non trouvé")
 
-        bulletin = (sub.groupby(["Matière", "Enseignant"])["Note"]
+        bulletin = (sub.groupby(["Matière", "Enseignant"])["note"]
                        .mean()
                        .round(2))
 
         # Classement par matière (optionnel mais très apprécié)
         classements = []
         for mat in sub["Matière"].unique():
-            notes_matiere = df[df["Matière"] == mat]["Note"]
-            note_etudiant = sub[sub["Matière"] == mat]["Note"].values[0]
+            notes_matiere = df[df["Matière"] == mat]["note"]
+            note_etudiant = sub[sub["Matière"] == mat]["note"].values[0]
             rang = (notes_matiere >= note_etudiant).sum()
             classements.append({
                 "matiere": mat,
@@ -124,8 +125,8 @@ class PandaAnalysisEngine:
 
         return {
             "etudiant_id": student_id,
-            "moyenne": round(sub["Note"].mean(), 2),
-            "credits_reussis": int((sub["Note"] >= 10).sum()),
+            "moyenne": round(sub["note"].mean(), 2),
+            "credits_reussis": int((sub["note"] >= 10).sum()),
             "bulletin": bulletin.to_dict(),
             "classements": classements
         }
@@ -137,7 +138,7 @@ class PandaAnalysisEngine:
         """
         df = pd.read_csv(csv_path)
         if category == "matiere":
-            ranking = df.groupby("Matière")["Note"].mean().sort_values(ascending=False)
+            ranking = df.groupby("Matière")["note"].mean().sort_values(ascending=False)
         else:
-            ranking = df.groupby("Enseignant")["Note"].mean().sort_values(ascending=False)
+            ranking = df.groupby("Enseignant")["note"].mean().sort_values(ascending=False)
         return ranking.head(10).to_dict()

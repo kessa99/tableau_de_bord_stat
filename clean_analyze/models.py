@@ -18,3 +18,4 @@ class Dataset(models.Model):
     data_upload = models.DateTimeField(default=timezone.now)
     stats_csv = models.FileField(upload_to='stats/', null=True, blank=True)
     notes_numpy = models.FileField(upload_to='notes_numpy/', null=True, blank=True)
+    

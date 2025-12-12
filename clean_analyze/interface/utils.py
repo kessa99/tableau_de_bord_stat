@@ -1,7 +1,7 @@
 """
 structure de reponse standard pour l'API
 """
-from rest_framework.response import Response
+from django.http import JsonResponse
 
 def standard_response(
     message: str = "",
@@ -26,4 +26,4 @@ def standard_response(
         "message": message,
         "content": content if content is not None else {}
     }
-    return Response(data, status=code)
+    return JsonResponse(data, status=code)

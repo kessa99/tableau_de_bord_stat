@@ -34,7 +34,7 @@ class DjangoDatasetRepository:
         model = Dataset.objects.get(id=dataset_id)
         return DatasetMapper.to_entity(model)
 
-    def get_all(self) -> List[DatasetEntity]:
+    def get_all(self) -> list[DatasetEntity]:
         """
         recuperer tous les datasets
         """
