@@ -1,10 +1,17 @@
+"""
+Modèles pour le projet de nettoyage et analyse de données
+"""
+
+import uuid
 from django.db import models
 
 # Create your models here.
-import uuid
 from django.utils import timezone
 
 class Dataset(models.Model):
+    """
+    Modèle pour stocker les données des fichiers CSV
+    """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nom_fichier = models.CharField(max_length=255)
     fichier_csv = models.FileField(upload_to='datasets/')
